@@ -5,9 +5,9 @@ import tkinter as tk
 Grid_size = 25 # 25 by 25 grid
 Screen_width = Grid_size*Grid_size
 Screen_height = Grid_size*Grid_size
-Speed = 100
-score = 0
-apple = [0,0,False]
+Speed = 100 #delay between updates, higher = slower
+score = 0 #score starts at 0
+apple = [0,0,False] # coordinates of apple + if an apple is spawned on screen
 
 
 # Setting up canvas
@@ -31,7 +31,8 @@ direction = 'up'
 
 def move_snake(snake, direction):
     new_head = snake[0].copy()
-    
+
+    #using x-y axis 
     x = 0 
     y = 1
 
@@ -58,7 +59,10 @@ def move_snake(snake, direction):
     return new_snake
 
 def draw_snake():
-    canvas.delete("snake")  # Remove old snake
+    #remove old snake
+    canvas.delete("snake")  
+
+    #draw new snake
     for [x,y] in snake:
         canvas.create_rectangle(
             x * Grid_size,
@@ -76,18 +80,21 @@ def check_collision():
     global score_label
     head = snake[0]
 
+    #check if head hits apple
     if head == apple[:2] and apple[2]:
         score+=1
+        #apple has been eaten, set apple spawn to false
         apple[2] = False
         score_label.config(text='Score        : {}'.format(score))
         
-
+    #check if head hits map boundary
     if (head[0] < 0 or head[0] >= Grid_size):
         return True
     
     elif (head[1] < 0 or head[1] >= Grid_size):
         return True
-    
+
+    #check if head hits own body
     elif (head in snake[1:]):
         return True
     
@@ -96,6 +103,8 @@ def check_collision():
 def change_direction(event):
     global direction
     new_direction = event.keysym.lower()
+
+    #opposite directions
     opposite_directions = {
         'up': 'down',
         'down': 'up',
@@ -103,7 +112,7 @@ def change_direction(event):
         'right': 'left'
     }
     
-    # Prevent the snake from reversing
+    #prevent the snake from reversing
     if new_direction in opposite_directions and direction != opposite_directions[new_direction]:
         direction = new_direction
 
@@ -116,13 +125,17 @@ window.bind('<Left>', change_direction)
 
 def spawn_apple():
     global apple
+
+    #gen coordinates to spawn apple
     x = random.randint(0,24)
     y = random.randint(0,24)
-    
+
+    #check if valid location
     while ([x,y] in snake):
         x = random.randint(0,24)
         y = random.randint(0,24)
-    
+
+    #spawn apple, set apple spawn to true
     apple = [x,y,True]
 
     return x,y
@@ -143,8 +156,12 @@ def draw_apple(x,y):
 def Start_Game():
     global snake
     global direction
+
+    #find tail of snake
     tail = snake[-1]
     snake = move_snake(snake, direction)
+
+    #if apple spawn = false, no apple is spawned so spawn one
     if not apple[2]:
         x,y = spawn_apple()
         draw_apple(x,y)
